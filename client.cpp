@@ -19,11 +19,10 @@ void show(string text, int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
     cout << endl << text << endl << endl;
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
-    
 }
 
 int main() {
-    string host = "localhost";
+    string host = "192.168.10.49";
     string service = "daytime";
     WSADATA wsadata;
 
