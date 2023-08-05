@@ -10,10 +10,14 @@ using namespace std;
 #define LINELEN 128
 #define WSVERS MAKEWORD(2, 0)
 
+#define MSG "what daytime is it\n"
+
 SOCKET connectsock(const char *host, const char*service, const char*transport);
 SOCKET connectTCP(const char *host, const char *service);
+SOCKET connectUDP(const char *host, const char *service);
 
 void TCPdaytime(const char *host, const char *service);
+void UDPdaytime(const char *host, const char *service);
 
 void show(string text, int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
@@ -22,7 +26,7 @@ void show(string text, int color) {
 }
 
 int main() {
-    string host = "192.168.10.49";
+    string host = "localhost";
     string service = "daytime";
     WSADATA wsadata;
 
@@ -30,6 +34,7 @@ int main() {
         show("socket 初始化失败 !", 4);
     }
     TCPdaytime(host.data(), service.data());
+    UDPdaytime(host.data(), service.data());
     WSACleanup();
     return 0;
 }
@@ -50,8 +55,30 @@ void TCPdaytime(const char *host, const char *service) {
     closesocket(s);
 }
 
+void UDPdaytime(const char *host, const char *service) {
+    char buf[LINELEN+1];
+    SOCKET s;
+    int n;
+    s = connectUDP(host, service);
+    (void) send(s, MSG, strlen(MSG), 0);
+    n = recv(s, buf, LINELEN, 0);
+    if(n == SOCKET_ERROR) {
+        stringstream ss; ss << "接收数据失败 :" << GetLastError();
+        show(ss.str(), 4);
+    }
+    else {
+        buf[n] = '\0';
+        (void) fputs(buf, stdout);
+    }
+    closesocket(s);
+}
+
 SOCKET connectTCP(const char *host, const char *service) {
     return connectsock(host, service, "tcp");
+}
+
+SOCKET connectUDP(const char *host, const char *service) {
+    return connectsock(host, service, "udp");
 }
 
 SOCKET connectsock(const char *host, const char*service, const char*transport) {
